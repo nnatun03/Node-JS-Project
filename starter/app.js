@@ -3,8 +3,13 @@ const fs = require('fs'); // import file system module
 const app = express(); // create express application
 const morgan = require('morgan'); // import morgan module
 
-app.user(morgan('dev')); // middleware to log request data
+app.use(morgan('dev')); // middleware to log request data
 app.use(express.json()); // middleware to parse JSON data from body
+app.use((req,res ,next) => { // middleware to log request time
+    req.requestTime = new Date().toISOString();
+    next();
+});
+
 
 const tours = JSON.parse( // read file and parse JSON data
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
@@ -77,17 +82,67 @@ const createTour = (req, res) => {
     });
 };
 
+const getAllUsers = (req, res) => { // create route handler
+    res.status(500).json({
+        status: 'error',
+        message: 'This route is not yet defined'
+    });
+};
+
+const createUser = (req, res) => { 
+    res.status(500).json({
+        status: 'error',
+        message: 'This route is not yet defined'
+    });
+};
+
+const getUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This route is not yet defined'
+    });
+};
+
+const updateUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This route is not yet defined'
+    });
+};
+
+const deleteUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This route is not yet defined'
+    });
+};
 // create route
+const tourRouter = express.Router(); // create router
+const userRouter = express.Router(); // create router
+app.use('/api/v1/tours', tourRouter); // use tour router
+app.use('/api/v1/users', userRouter); // use user router
+
 app 
-    .route('/api/v1/tours')
+    .route('/')
     .get(getAllTours)
     .post(createTour);
 
 app
-    .route('/api/v1/tours/:id')
+    .route('/:id')
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour);
+
+app
+    .route('/')
+    .get(getAllUsers)
+    .post(createUser);
+
+app
+    .route('/:id')
+    .get(getUser)
+    .patch(updateUser)
+    .delete(deleteUser);
 
 
 const port = 3000;
