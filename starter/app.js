@@ -7,8 +7,13 @@ const userRouter = require('./routes/userRoutes'); // import user router
 const app = express(); // create express application
 
 // 1) MIDDLEWARES
-app.use(morgan('dev')); // middleware to log request data
+if (process.env.NODE_ENV === 'development') { // if in development mode
+    app.use(morgan('dev')); // use morgan to log request data
+}
+
 app.use(express.json()); // middleware to parse JSON data from body
+app.use(express.static(`${__dirname}/public`)); // middleware to serve static files
+
 app.use((req,res ,next) => { // middleware to log request time
     req.requestTime = new Date().toISOString();
     next();

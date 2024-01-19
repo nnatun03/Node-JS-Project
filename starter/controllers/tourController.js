@@ -15,6 +15,15 @@ exports.checkID = (req, res, next, val) => { // middleware to check id
     next(); // if id is valid, call next middleware
 };
 
+exports.checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) { // if name or price is missing
+        return res.status(400).json({ // return error
+            status: 'fail',
+            message: 'Missing name or price'
+        });
+    }
+    next(); // if name and price are provided, call next middleware
+}
 
 exports.getAllTours = (req, res) => { // create route handler
     res.status(200).json({
