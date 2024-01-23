@@ -1,73 +1,111 @@
-const fs = require('fs'); // import file system module
+/* eslint-disable prettier/prettier */
+const Tour = require('../models/tourModel'); // import Tour model
 
-const tours = JSON.parse( // read file and parse JSON data
-    fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-    );
-
-exports.checkID = (req, res, next, val) => { // middleware to check id
-    console.log(`Tour id is: ${val}`);
-    if (req.params.id * 1 > tours.length) { // if id is invalid
-        return res.status(404).json({ // return error
-            status: 'fail',
-            message: 'Invalid ID'
-        });
-    }
-    next(); // if id is valid, call next middleware
-};
-
-exports.checkBody = (req, res, next) => {
-    if (!req.body.name || !req.body.price) { // if name or price is missing
-        return res.status(400).json({ // return error
-            status: 'fail',
-            message: 'Missing name or price'
-        });
-    }
-    next(); // if name and price are provided, call next middleware
-}
-
-exports.getAllTours = (req, res) => { // create route handler
+exports.getAllTours = async (req, res) => {
+  try {
+    const tours = await Tour.find(); // Assuming you want to retrieve all tours from the database
     res.status(200).json({
-        status: 'success',
-        results: tours.length, // number of tours chỉ dùng khi get all tours
-        data: {
-            tours
-        }
+      status: 'success',
+      results: tours.length,
+      data: {
+        tours,
+      },
     });
-};   
-
-exports.getTour = (req, res) => {
-    const id = req.params.id * 1; // convert id to number
-    const tour = tours.find(el => el.id === id); // find tour with given id
-    res.status(200).json({ // if tour found
-        status: 'success',
-        data: {
-            tour
-        }
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message,
     });
+  }
 };
 
-exports.updateTour = (req, res) => {
-    // Send the updated tour data in the response
+exports.getTour = async (req, res) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    if (!tour) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Tour not found',
+      });
+    }
     res.status(200).json({
-        status: 'success',
-        data: {
-            tour: '<Updated tour here...>'
-        }
+      status: 'success',
+      data: {
+        tour,
+      },
     });
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
 
-exports.deleteTour = (req, res) => {
-    // Send the updated tour data in the response
+exports.updateTour = async (req, res) => {
+  try {
+    const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, // Return the modified document rather than the original
+      runValidators: true, // Run model validation before updating
+    });
+
+    if (!updatedTour) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Tour not found',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: updatedTour,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteTour = async (req, res) => {
+  try {
+    const deletedTour = await Tour.findByIdAndDelete(req.params.id);
+
+    if (!deletedTour) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Tour not found',
+      });
+    }
+
     res.status(204).json({
-        status: 'success',
-        data: null
+      status: 'success',
+      data: null,
     });
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };
-exports.createTour = (req, res) => { 
+
+exports.createTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body);
     res.status(201).json({
-        status: 'success',
-        data: {
-            tour: '<New tour here...>'
-        }
+      status: 'success',
+      data: {
+        tour: newTour,
+      },
     });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    });
+  }
 };

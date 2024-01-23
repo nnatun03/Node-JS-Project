@@ -13,6 +13,7 @@ const DB = process.env.DATABASE.replace( // replace password with env variable
 
 mongoose.connect(DB, {
   useNewUrlParser: true,
+  w: 'majority'
 })
 .then(() => console.log('DB connection successful!'));
 
